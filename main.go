@@ -6,14 +6,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 	"sync"
 )
 
 type Player struct {
 	Name  string
 	Code  string
-	Score int
+	Score float64
 }
 
 var players map[string]*Player
@@ -24,19 +23,19 @@ func upsertPlayer(key string, new_p Player) {
 	if p, ok := players[key]; ok {
 		log.Println("Updating player : " + key)
 		if new_p.Name != "" {
-			log.Println("Updating name for " + key + " to " + new_p.Name)
+			//log.Println("Updating name for " + key + " to " + new_p.Name)
 			p.Name = new_p.Name
 		}
 		if new_p.Code != "" {
-			log.Println("Updating code for " + key + " to " + new_p.Code)
+			//log.Println("Updating code for " + key + " to " + new_p.Code)
 			p.Code = new_p.Code
 		}
 		if new_p.Score != 0 {
-			log.Println("Updating score for " + key + " to " + strconv.Itoa(new_p.Score))
+			//log.Println("Updating score for " + key + " to " + strconv.Itoa(new_p.Score))
 			p.Score = new_p.Score
 		}
 	} else {
-		log.Println("Inserting new player : " + key)
+		log.Printf("Inserting new player : %v\n", key)
 		players[key] = &new_p
 	}
 }
@@ -50,7 +49,11 @@ func leaderboardHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func upsertHandler(w http.ResponseWriter, r *http.Request) {
-	//fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[len("/upsert/"):])
+	defer func() {
+		if err := recover(); err != nil {
+			http.Error(w, err.(string), 403)
+		}
+	}()
 	key := r.URL.Path[len("/upsert/"):]
 	decoder := json.NewDecoder(r.Body)
 	var p Player
@@ -63,6 +66,9 @@ func upsertHandler(w http.ResponseWriter, r *http.Request) {
 	upsertPlayer(key, p)
 	savePlayersToFile()
 	m.Unlock()
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte("Entry received"))
 }
 
 func getAllHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +82,11 @@ func getAllHandler(w http.ResponseWriter, r *http.Request) {
 
 func savePlayersToFile() {
 	log.Println("Saving players to file")
-	js, err := json.Marshal(players)
+	js, err := json.MarshalIndent(players, "", "    ")
 	if err != nil {
 		panic("Could not marshal JSON")
 	}
-	err = ioutil.WriteFile("players.txt", js, 0644)
+	err = ioutil.WriteFile("players.json", js, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +94,7 @@ func savePlayersToFile() {
 
 func readFromFile() {
 	log.Println("Reading players from file")
-	b, err := ioutil.ReadFile("players.txt")
+	b, err := ioutil.ReadFile("players.json")
 	if err != nil {
 		panic(err)
 	}

@@ -2,16 +2,39 @@ function engine_onload() {
 	var eng = new engine();
 	var editor;
 
+	var user_email = "";
+	var user_name = "";
+	var user_start = new Date();
+	var last_score = 100000;
+
 	var loadLocalStorage = function() {
 		editor.doc.setValue(localStorage.getItem("code") || engine_algo_line_txt);
+		user_email = localStorage.getItem("user_email") || "anonymous@example.com";
+		user_name = localStorage.getItem("user_name") || "anonymous";
+		user_start = localStorage.getItem("user_start") ? new Date(parseFloat(localStorage.getItem("user_start"))) : new Date();
 	};
 
 	var saveLocalStorage = function() {
 		localStorage.setItem("code", editor.doc.getValue());
+		localStorage.setItem("user_email", user_email);
+		localStorage.setItem("user_name", user_name);
+		localStorage.setItem("user_start", user_start.getTime());
 	};
 
 	var submit = function() {
-
+		var payload = {
+			Name: user_name,
+			Code: editor.doc.getValue(),
+			Score: last_score
+		};
+		var rx = $.ajax("/upsert/" + encodeURIComponent(user_email), {
+			type: "POST",
+			data: JSON.stringify(payload),
+			processData: false
+		});
+		rx.always(function(xhr) {
+			$('#' + eng.status2id).text(xhr);
+		});
 	};
 
 	if (eng.designMode) {
@@ -21,6 +44,7 @@ function engine_onload() {
 			autofocus: true,
 			lineNumbers: true,
 			indentUnit: 4,
+			indentWithTabs: true,
 			theme: "eclipse",
 			mode: "javascript"
 		});
@@ -36,6 +60,7 @@ function engine_onload() {
 				var sim = eng.runSimulation();
 				var seed = 0;
 				if (typeof sim == "number") {
+					last_score = sim;
 					saveLocalStorage();
 					$('#' + eng.submitid).removeAttr("disabled");
 					$('#' + eng.status2id).text("Average days: " + sim);
