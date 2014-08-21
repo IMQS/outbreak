@@ -1,0 +1,36 @@
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.codePane {
+	width: 100em;			/* eats up all space not used by the other columns */
+	height: 100%;
+	background: #f0f0f0;
+}
+
+.map {
+	margin: 20px;
+	border: 1px solid #666;
+	border-radius: 2px;
+}
+
+.btnDiv {
+	text-align: right;
+	margin: 1.0em;
+}
+
+.btn {
+	height: 2.0em;
+	width: 10em;
+}
+
+.status {
+	margin: 1em;
+	font-size: 15pt;
+}
