@@ -42,11 +42,11 @@ func upsertPlayer(key string, new_p Player) {
 }
 
 func gameHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./game.html")
+	http.ServeFile(w, r, "./static/game.html")
 }
 
 func leaderboardHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./leaderboard.html")
+	http.ServeFile(w, r, "./static/leaderboard.html")
 }
 
 func upsertHandler(w http.ResponseWriter, r *http.Request) {
@@ -100,10 +100,15 @@ func readFromFile() {
 
 func main() {
 	readFromFile()
-	http.HandleFunc("/", gameHandler)
-	http.HandleFunc("/leaderboard", leaderboardHandler)
+	//http.HandleFunc("/game", gameHandler)
+	//http.HandleFunc("/leaderboard", leaderboardHandler)
 	http.HandleFunc("/upsert/", upsertHandler)
 	http.HandleFunc("/getall", getAllHandler)
+
+	// Normal resources
+	//http.Handle("/static", http.FileServer(http.Dir("./static/")))
+	http.Handle("/", http.FileServer(http.Dir("./")))
+
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

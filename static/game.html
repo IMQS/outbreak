@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+
+<head>
+<script src='/static/jquery-2.0.3.min.js'></script>
+<script src='/static/seedrandom.js'></script>
+<script src='/static/engine.js'></script>
+<script src='/static/codemirror/lib/codemirror.js'></script>
+<script src='/static/codemirror/mode/javascript/javascript.js'></script>
+
+<link rel="stylesheet" href="/static/develop.css"/>
+<link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
+
+<link rel="stylesheet" href="/static/codemirror/theme/ambiance.css">
+<link rel="stylesheet" href="/static/codemirror/theme/eclipse.css">
+<link rel="stylesheet" href="/static/codemirror/theme/elegant.css">
+<link rel="stylesheet" href="/static/codemirror/theme/mdn-like.css">
+<link rel="stylesheet" href="/static/codemirror/theme/monokai.css">
+<link rel="stylesheet" href="/static/codemirror/theme/mbo.css">
+<link rel="stylesheet" href="/static/codemirror/theme/neat.css">
+<link rel="stylesheet" href="/static/codemirror/theme/neo.css">
+<link rel="stylesheet" href="/static/codemirror/theme/paraiso-light.css">
+<link rel="stylesheet" href="/static/codemirror/theme/xq-light.css">
+
+</head>
+
+<body onload="engine_onload()">
+	<table style='height: 100%;'>
+		<tr>
+			<td class='codePane'>
+				<textarea rows='200' id='codeArea'></textarea>
+				<div class='btnDiv'><button id='run' class='btn'>Run</button></div>
+				<div class='btnDiv'><button id='submit' class='btn'>Submit</button></div>
+			</td>
+			<td style='text-align: center'>
+				<canvas id='map' class='map' width='512' height='512'></canvas>
+				<div><label>Simulation delay <input id='pause' size='5' value='0'></input>ms</label></div>
+				<div id='status' class='status'>&nbsp;</div>
+			</td>
+		</tr>
+	</table>
+</body>
