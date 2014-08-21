@@ -7,6 +7,8 @@ function engine_onload() {
 	var user_start = new Date();
 	var last_score = 100000;
 
+	var time_limit_ms = 10 * 60 * 1000;
+
 	var loadLocalStorage = function() {
 		editor.doc.setValue(localStorage.getItem("code") || engine_algo_line_txt);
 		user_email = localStorage.getItem("user_email") || "anonymous@example.com";
@@ -37,6 +39,17 @@ function engine_onload() {
 		});
 	};
 
+	var showGameOver = function() {
+		if ((new Date()).getTime() - user_start.getTime() > time_limit_ms) {
+			$("body").append("<div class='modal'><div class='modal-inner'>" +
+				"<div class='game-over'>Game over!</div>" + 
+				"<a class='try-again' href='newgame.html'>New game</a>" + 
+				"</div></div>");
+		} else {
+			setTimeout(5000, showGameOver);
+		}
+	};
+
 	if (eng.designMode) {
 		eng.setupDesignMode();
 	} else {
@@ -53,6 +66,7 @@ function engine_onload() {
 			$('#' + eng.submitid).attr("disabled", "disabled");
 		});
 		loadLocalStorage();
+		showGameOver();
 		var run = function() {
 			var pause = $('#pause').val();
 			$('#' + eng.submitid).attr("disabled", "disabled");

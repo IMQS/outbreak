@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+
+<head>
+<script src='/static/jquery-2.0.3.min.js'></script>
+<link rel="stylesheet" href="/static/newgame.css"/>
+<script>
+function loaded() {
+	var run = function() {
+		var email = $("#email").val();
+		var name = $("#name").val();
+		if (email == "" || name == "") {
+			alert("You must enter a name and email");
+		} else {
+			localStorage.removeItem("code");
+			localStorage.setItem("user_email", email);
+			localStorage.setItem("user_name", name);
+			localStorage.setItem("user_start", (new Date()).getTime());
+			window.location = "game.html";
+		}
+
+	};
+	$("#email").keyup(function (e) {
+		if (e.keyCode == 13)
+			run();
+	});
+	$("#go").click(run);
+}
+</script>
+</head>
+
+<body onload='loaded()'>
+<div class='absolute-center'>
+	<table>
+		<tr class='label-row'>
+			<td colspan='2'>
+				<div class='instructions'>
+					A deadly outbreak is spreading through Africa. You must write a function that
+					chooses where to place containment barriers. The disease cannot spread past a barrier.
+					When you start, a simple function will be provided that creates a horizontal barrier
+					across the equator. There are much better ways of containing the outbreak.
+					<br/>
+					<br/>
+					Once you press Go, you have ten minutes.
+					<br/>
+					<br/>
+					<br/>
+				</div>
+			</td>
+		</tr>
+		<tr class='label-row'>
+			<td><div class='label'>Name</div></td><td><input id='name' /></td>
+		</tr>
+		<tr class='label-row'>
+			<td><div class='label'>Email</div></td><td><input id='email' /></td>
+		</tr>
+		<tr class='label-row'>
+			<td></td><td style='text-align: right'><button id='go'>Go!</button></td>
+		</tr>
+	</table>
+</div>
+</body>
