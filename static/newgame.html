@@ -6,24 +6,29 @@
 <script>
 function loaded() {
 
-	var run = function() {
+	var run = function(code) {
+		var email = $("#email").val();
+		var name = $("#name").val();
+		localStorage.removeItem("code");
+		localStorage.removeItem("best_score");
+		localStorage.setItem("user_email", email);
+		localStorage.setItem("user_name", name);
+		localStorage.setItem("user_start", (new Date()).getTime());
+		if (code != null && code != "")
+			localStorage.setItem("code", code);
+		window.location = "game.html";
+	};
+
+	var tryRun = function() {
 		var email = $("#email").val();
 		var name = $("#name").val();
 		if (email == "" || name == "") {
 			alert("You must enter a name and email");
 		} else {
-			localStorage.removeItem("code");
-			localStorage.removeItem("best_score");
-			localStorage.setItem("user_email", email);
-			localStorage.setItem("user_name", name);
-			localStorage.setItem("user_start", (new Date()).getTime());
-			window.location = "game.html";
+			$.get("/getCode/" + encodeURIComponent(email), null, function(res, status) {
+				run(res);
+			} )
 		}
-	};
-
-	var tryRun = function() {
-		//$.ajax("")
-		run();
 	};
 
 	$("#email").keyup(function (e) {

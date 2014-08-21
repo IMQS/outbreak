@@ -97,6 +97,18 @@ func getAllHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+func getCodeHandler(w http.ResponseWriter, r *http.Request) {
+	key := r.URL.Path[len("/getCode/"):]
+	w.Header().Set("Content-Type", "text/plain")
+	m.Lock()
+	if player, ok := players[key]; ok {
+		w.Write([]byte(player.Code))
+	} else {
+		w.Write([]byte(""))
+	}
+	m.Unlock()
+}
+
 func savePlayersToFile() {
 	log.Println("Saving players to file")
 	js, err := json.MarshalIndent(players, "", "    ")
@@ -126,6 +138,7 @@ func main() {
 	http.Handle("/static/", http.FileServer(http.Dir("./")))
 	http.HandleFunc("/upsert/", upsertHandler)
 	http.HandleFunc("/getall", getAllHandler)
+	http.HandleFunc("/getCode/", getCodeHandler)
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
