@@ -17,8 +17,6 @@ Player.prototype.render = function(divId) {
 	$("#"+divId).append(html);
 	try {
 		this.engine.draw(mapId);
-		var seed = Math.floor(Math.random() * 50) + 0;
-		this.engine.seed(seed);
 		this.engine.runInteractive(10, 0);
 	} catch(e) {
 		console.log("Failed to render bad code");
