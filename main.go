@@ -100,14 +100,9 @@ func readFromFile() {
 
 func main() {
 	readFromFile()
-	//http.HandleFunc("/game", gameHandler)
-	//http.HandleFunc("/leaderboard", leaderboardHandler)
+	http.Handle("/static/", http.FileServer(http.Dir("./")))
 	http.HandleFunc("/upsert/", upsertHandler)
 	http.HandleFunc("/getall", getAllHandler)
-
-	// Normal resources
-	//http.Handle("/static", http.FileServer(http.Dir("./static/")))
-	http.Handle("/", http.FileServer(http.Dir("./")))
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
