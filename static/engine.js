@@ -1,105 +1,3 @@
-function engine_onload() {
-	var eng = new engine();
-	var editor;
-
-	var user_email = "";
-	var user_name = "";
-	var user_start = new Date();
-	var last_score = 100000;
-
-	var time_limit_ms = 10 * 60 * 1000;
-
-	var loadLocalStorage = function() {
-		editor.doc.setValue(localStorage.getItem("code") || engine_algo_line_txt);
-		user_email = localStorage.getItem("user_email") || "anonymous@example.com";
-		user_name = localStorage.getItem("user_name") || "anonymous";
-		user_start = localStorage.getItem("user_start") ? new Date(parseFloat(localStorage.getItem("user_start"))) : new Date();
-	};
-
-	var saveLocalStorage = function() {
-		localStorage.setItem("code", editor.doc.getValue());
-		localStorage.setItem("user_email", user_email);
-		localStorage.setItem("user_name", user_name);
-		localStorage.setItem("user_start", user_start.getTime());
-	};
-
-	var submit = function() {
-		var payload = {
-			Name: user_name,
-			Code: editor.doc.getValue(),
-			Score: last_score
-		};
-		var rx = $.ajax("/upsert/" + encodeURIComponent(user_email), {
-			type: "POST",
-			data: JSON.stringify(payload),
-			processData: false
-		});
-		rx.always(function(xhr) {
-			$('#' + eng.status2id).text(xhr);
-		});
-	};
-
-	var showGameOver = function() {
-		if ((new Date()).getTime() - user_start.getTime() > time_limit_ms) {
-			$("body").append("<div class='modal'><div class='modal-inner'>" +
-				"<div class='game-over'>Game over!</div>" + 
-				"<a class='try-again' href='newgame.html'>New game</a>" + 
-				"</div></div>");
-		} else {
-			setTimeout(5000, showGameOver);
-		}
-	};
-
-	if (eng.designMode) {
-		eng.setupDesignMode();
-	} else {
-		var editor = CodeMirror.fromTextArea(document.getElementById('codeArea'), {
-			autofocus: true,
-			lineNumbers: true,
-			indentUnit: 4,
-			indentWithTabs: true,
-			theme: "eclipse",
-			mode: "javascript"
-		});
-		editor.setSize("100%", "50em");
-		editor.on("change", function() {
-			$('#' + eng.submitid).attr("disabled", "disabled");
-		});
-		loadLocalStorage();
-		showGameOver();
-		var run = function() {
-			var pause = $('#pause').val();
-			$('#' + eng.submitid).attr("disabled", "disabled");
-			$('#' + eng.status1id).text(".");
-			$('#' + eng.status2id).text(".");
-			eng.stopInteractive();
-			if (eng.loadNewCode(editor.doc.getValue())) {
-				saveLocalStorage();
-				var sim = eng.runSimulation();
-				var seed = 0;
-				if (typeof sim == "number") {
-					last_score = sim;
-					$('#' + eng.submitid).removeAttr("disabled");
-					$('#' + eng.status2id).text("Average over 50 runs: " + sim);
-					// Run simulation zero
-					seed = parseInt($('#seed').val(), 10);
-				} else {
-					// run the simulation that failed
-					seed = sim.seed;
-					//$('#' + eng.status2id).text(sim.reason);
-				}
-				eng.resetWorld();
-				eng.seed(seed);
-				eng.runInteractive(parseFloat(pause), 0);
-			}
-		};
-		$('#submit').click( submit );
-		$('#run').click( run );
-		//run();
-		eng.draw(eng.mapid);
-	}
-}
-
 var engine_world_width = 64;
 var engine_world_height = 64;
 
@@ -117,6 +15,140 @@ var engine_simulate_count = 50;
 var engine_spreadrate = 0.35;
 
 var engine_status_game_over = "Game over";
+var engine_status_too_slow = "Function is too slow";
+
+function engine_onload() {
+	var eng = new engine();
+	var editor;
+
+	var user_email = "";
+	var user_name = "";
+	var user_start = new Date();
+	var last_score = 100000;
+	var best_score = 100000;
+
+	var time_limit_s = 10 * 60;
+
+	var loadLocalStorage = function() {
+		editor.doc.setValue(localStorage.getItem("code") || engine_algo_line_txt);
+		user_email = localStorage.getItem("user_email") || "anonymous@example.com";
+		user_name = localStorage.getItem("user_name") || "anonymous";
+		user_start = localStorage.getItem("user_start") ? new Date(parseFloat(localStorage.getItem("user_start"))) : new Date();
+		best_score = parseFloat(localStorage.getItem("best_score") || "100000");
+	};
+
+	var saveLocalStorage = function() {
+		localStorage.setItem("code", editor.doc.getValue());
+		localStorage.setItem("user_email", user_email);
+		localStorage.setItem("user_name", user_name);
+		localStorage.setItem("user_start", user_start.getTime());
+		localStorage.setItem("best_score", best_score);
+	};
+
+	var submit = function(msg) {
+		var payload = {
+			Name: user_name,
+			Code: editor.doc.getValue(),
+			Score: last_score
+		};
+		var rx = $.ajax("/upsert/" + encodeURIComponent(user_email), {
+			type: "POST",
+			data: JSON.stringify(payload),
+			processData: false
+		});
+		rx.always(function(xhr) {
+			$('#' + eng.status2id).text("(" + xhr + ") " + msg);
+		});
+	};
+
+	var showGameOver = function() {
+		var seconds_remaining = time_limit_s - ((new Date()).getTime() - user_start.getTime()) / 1000;
+		var minutes_remaining = Math.ceil(seconds_remaining / 60);
+		console.log("seconds remaining: " + seconds_remaining);
+		if (seconds_remaining < 0) {
+			$("body").append("<div class='modal'><div class='modal-inner'>" +
+				"<div class='game-over'>Game over!</div>" + 
+				"<a class='try-again' href='newgame.html'>New game</a>" + 
+				"</div></div>");
+		} else {
+			$("#timer").text("Minutes remaining: " +minutes_remaining);
+			setTimeout(showGameOver, 3000);
+		}
+	};
+
+	var resizePanels = function() {
+		var all = $("html").height();
+		var top = $("#instructions").outerHeight();
+		var bottom = $("#submitPanel").outerHeight();
+		var cm = $(".CodeMirror");
+		cm.css("height", all - top - bottom - 40);
+	};
+
+	if (eng.designMode) {
+		eng.setupDesignMode();
+	} else {
+		var editor = CodeMirror.fromTextArea(document.getElementById('codeArea'), {
+			autofocus: true,
+			lineNumbers: true,
+			indentUnit: 4,
+			indentWithTabs: true,
+			theme: "eclipse",
+			mode: "javascript"
+		});
+		editor.setSize("100%", "40em");
+		//editor.on("change", function() {
+		//	$('#' + eng.submitid).attr("disabled", "disabled");
+		//});
+		window.onresize = function() {
+			resizePanels();
+		};
+		resizePanels();
+		loadLocalStorage();
+		showGameOver();
+		var run = function() {
+			var pause = $('#pause').val();
+			//$('#' + eng.submitid).attr("disabled", "disabled");
+			$('#' + eng.status1id).text(".");
+			$('#' + eng.status2id).text(".");
+			eng.stopInteractive();
+			if (eng.loadNewCode(editor.doc.getValue())) {
+				saveLocalStorage();
+				var runOneSim = true;
+				var sim = eng.runSimulation();
+				var seed = 0;
+				if (typeof sim == "number") {
+					last_score = sim;
+					if (sim < best_score) {
+						best_score = sim;
+						submit("Average over " + engine_simulate_count + " runs: " + sim);
+					} else {
+						$('#' + eng.status2id).text("Average over " + engine_simulate_count + " runs: " + sim);
+					}
+					//$('#' + eng.submitid).removeAttr("disabled");
+					//$('#' + eng.status2id).text("Average over 50 runs: " + sim);
+					// Run simulation zero
+					seed = parseInt($('#seed').val(), 10);
+				} else {
+					// run the simulation that failed
+					seed = sim.seed;
+					$('#' + eng.status2id).text(sim.reason);
+					if (sim.reason == engine_status_too_slow)
+						runOneSim = false;
+				}
+
+				if (runOneSim) {
+					eng.resetWorld();
+					eng.seed(seed);
+					eng.runInteractive(parseFloat(pause), 0);
+				}
+			}
+		};
+		$('#submit').click( submit );
+		$('#run').click( run );
+		//run();
+		eng.draw(eng.mapid);
+	}
+}
 
 function engine_algo_1(world) {
 	var SEA = 1;
@@ -340,7 +372,12 @@ engine.prototype.loadNewCode = function(code) {
 
 engine.prototype.runSimulation = function() {
 	var total = 0;
+	var tstart = new Date();
 	for (var i = 0; i < engine_simulate_count; i++) {
+		var tduration = (new Date()).getTime() - tstart.getTime();
+		if (i == 3 && tduration > 1000) {
+			return {seed: i, reason: engine_status_too_slow};
+		}
 		this.seed(i);
 		this.resetWorld();
 		var r = this.runToEnd();

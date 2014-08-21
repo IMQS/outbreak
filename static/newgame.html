@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="/static/newgame.css"/>
 <script>
 function loaded() {
+
 	var run = function() {
 		var email = $("#email").val();
 		var name = $("#name").val();
@@ -12,18 +13,24 @@ function loaded() {
 			alert("You must enter a name and email");
 		} else {
 			localStorage.removeItem("code");
+			localStorage.removeItem("best_score");
 			localStorage.setItem("user_email", email);
 			localStorage.setItem("user_name", name);
 			localStorage.setItem("user_start", (new Date()).getTime());
 			window.location = "game.html";
 		}
-
 	};
+
+	var tryRun = function() {
+		//$.ajax("")
+		run();
+	};
+
 	$("#email").keyup(function (e) {
 		if (e.keyCode == 13)
-			run();
+			tryRun();
 	});
-	$("#go").click(run);
+	$("#go").click(tryRun);
 }
 </script>
 </head>
@@ -35,7 +42,7 @@ function loaded() {
 			<td colspan='2'>
 				<div class='instructions'>
 					A deadly outbreak is spreading through Africa. You must write a function that
-					chooses where to place containment barriers. The disease cannot spread past a barrier.
+					chooses where to place containment barriers. The disease cannot spread past your barriers.
 					When you start, a simple function will be provided that creates a horizontal barrier
 					across the equator. There are much better ways of containing the outbreak.
 					<br/>

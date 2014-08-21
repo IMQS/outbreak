@@ -37,12 +37,10 @@ body {
 	text-decoration: none;
 }
 
+
 .instructions {
-	background: #fff;
-	padding: 1em;
-	margin-bottom: 1em;
-	border: 1px solid #ccc;
-	border-radius: 1px;
+	background: #f0f0f0;
+	padding: 1em 1.5em;
 }
 
 .instructions code {
@@ -53,10 +51,43 @@ body {
 	border: 1px solid #ececec;
 }
 
+/*
+.CodeMirror {
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+*/
+
+.bigtable {
+	background: #f0f0f0;
+	height: 100%;
+}
+
 .codePane {
+	background: #f0f0f0;
 	width: 100em;			/* eats up all space not used by the other columns */
 	height: 100%;
+	vertical-align: top;
+}
+
+.mapPane {
 	background: #f0f0f0;
+	vertical-align: top;
+	text-align: center;
+}
+
+.logo-outer {
+	text-align: right;
+	display: inline-block;
+	width: 100%;
+}
+
+.logo {
+	width: 300px;
+	height: 104px;
+	background-image: url("/static/logo-small.png");
+	margin-bottom: 30px;
+	display: inline-block;
 }
 
 .map {
@@ -83,8 +114,8 @@ body {
 .status2 {
 	display: inline-block;
 	width: 25em;
-	margin: 0em 1em;
-	font-size: 15pt;
+	margin: 0em 2em;
+	font-size: 12pt;
 }
 
 .leaderboard-table {

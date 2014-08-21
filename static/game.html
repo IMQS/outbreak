@@ -24,26 +24,33 @@
 </head>
 
 <body onload="engine_onload()">
-	<table style='height: 100%;'>
+	<table class='bigtable'>
 		<tr>
 			<td class='codePane'>
-				<div class='instructions'>
+				<div id='instructions' class='instructions'>
 					Modify this function so that it places barriers at better locations.<br/>
-					Click <code>Try</code> to test your code.
-					Click <code>Submit</code> to send your code to the leaderboard.<br/>
-					You can Submit as many attempts as you like.
+					Click <em>Run</em> to test your code.<br/>
+					If your function is better than your previous attempts it will automatically be submitted to the leaderboard.
 					<br/>
-					Use world.width, world.height, world.get(x,y).
+					The world coordinates are (0,0) in the top-left, and (world.width, world.height) at the bottom-right.<br/>
+					Use world.get(x,y) to retrieve the status of a cell.
+					<br/>
+					You must return the coordinates [x,y] for where you want to place a barrier.
 				</div>
+				<div style='height: 1px; background: #ddd'></div>
 				<textarea rows='200' id='codeArea'></textarea>
-				<div class='btnDiv'><button id='run' class='btn'>Run</button></div>
-				<div class='btnDiv'><div id='status2' class='status2'>&nbsp;</div><button id='submit' class='btn'>Submit</button></div>
+				<div id='submitPanel'>
+					<div class='btnDiv'><div id='status2' class='status2'>&nbsp;</div><button id='run' class='btn'>Run</button></div>
+					<!-- <div class='btnDiv'><div id='status2' class='status2'>&nbsp;</div><button id='submit' class='btn'>Submit</button></div> -->
+				</div>
 			</td>
-			<td style='text-align: center'>
+			<td class='mapPane'>
+				<div class='logo-outer'><div id='logo' class='logo'></div></div>
 				<canvas id='map' class='map' width='512' height='512'></canvas>
 				<div><label>Simulation delay <input id='pause' size='5' value='0'></input>ms</label></div>
 				<div><label>Random seed <input id='seed' size='5' value='0'></input></label></div>
 				<div id='status1' class='status1'>&nbsp;</div>
+				<div id='timer' class='timer'>&nbsp;</div>
 			</td>
 		</tr>
 	</table>
