@@ -1,5 +1,18 @@
 function engine_onload() {
 	var eng = new engine();
+	var editor;
+
+	var loadLocalStorage = function() {
+		editor.doc.setValue(localStorage.getItem("code") || engine_algo_line_txt);
+	};
+
+	var saveLocalStorage = function() {
+		localStorage.setItem("code", editor.doc.getValue());
+	};
+
+	var submit = function() {
+
+	};
 
 	if (eng.designMode) {
 		eng.setupDesignMode();
@@ -7,24 +20,38 @@ function engine_onload() {
 		var editor = CodeMirror.fromTextArea(document.getElementById('codeArea'), {
 			autofocus: true,
 			lineNumbers: true,
+			indentUnit: 4,
 			theme: "eclipse",
 			mode: "javascript"
 		});
-		editor.doc.setValue(engine_algo_line_txt);
 		editor.setSize("100%", "50em");
+		loadLocalStorage();
 		var run = function() {
 			var pause = $('#pause').val();
-			$('#' + eng.statusid).text(".");
+			$('#' + eng.submitid).attr("disabled", "disabled");
+			$('#' + eng.status1id).text(".");
+			$('#' + eng.status2id).text(".");
 			eng.stopInteractive();
 			if (eng.loadNewCode(editor.doc.getValue())) {
+				var sim = eng.runSimulation();
+				var seed = 0;
+				if (typeof sim == "number") {
+					saveLocalStorage();
+					$('#' + eng.submitid).removeAttr("disabled");
+					$('#' + eng.status2id).text("Average days: " + sim);
+					// Run simulation zero
+				} else {
+					// run the simulation that failed
+					seed = sim.seed;
+					//$('#' + eng.status2id).text(sim.reason);
+				}
 				eng.resetWorld();
-				eng.seed(0);
+				eng.seed(seed);
 				eng.runInteractive(parseFloat(pause), 0);
 			}
 		};
-		$('#run').click( function(e) {
-			run();
-		});
+		$('#submit').click( submit );
+		$('#run').click( run );
 		run();
 	}
 }
@@ -41,7 +68,7 @@ var engine_ws_land = 2;
 var engine_ws_infected  = 3;
 var engine_ws_barrier = 4;
 
-var engine_simulate_count = 100;
+var engine_simulate_count = 50;
 
 var engine_status_game_over = "Game over";
 
@@ -93,14 +120,14 @@ var engine_algo_line_txt =
 "	var LAND = 2;\n" +
 "	var INFECTED = 3;\n" +
 "	var BARRIER = 4;\n" +
-"\n" +
+"	\n" +
 "	var y = 29;\n" +
-"\n" +
+"	\n" +
 "	for (var x = 0; x < world.width; x++) {\n" +
 "		if (world.get(x,y) == LAND)\n" +
 "			return [x,y];\n" +
 "	}\n" +
-"\n" +
+"	\n" +
 "	// \"pass\".. ie do nothing.\n" +
 "	return null;\n" +
 "}\n";
@@ -108,12 +135,15 @@ var engine_algo_line_txt =
 
 function engine() {
 	this.seed(0);
+	this.canvasDirty = true;
 	//this.algo = engine_algo_1;
 	this.algo = engine_algo_line;
 	this.spreadRate = 0.30;
 	this.mapid = "map";
 	this.pauseid = "pause";
-	this.statusid = "status";
+	this.status1id = "status1";
+	this.status2id = "status2";
+	this.submitid = "submit";
 	this.world = new Array(engine_world_width * engine_world_height)
 	this.world.width = engine_world_width;
 	this.world.height = engine_world_height;
@@ -125,7 +155,7 @@ function engine() {
 
 	// visualization state
 	this.designMode = false;
-	this.lastInfection = null;
+	this.lastInfection = [];
 	this.lastBarrier = null;
 	this.lastWarning = null;
 	this.runTimer = null;
@@ -152,6 +182,7 @@ engine.prototype.resetWorld = function() {
 			this.world[i] = engine_base_world[i];
 	}
 	this.set(engine_start_x, engine_start_y, engine_ws_infected);
+	this.canvasDirty = true;
 }
 
 engine.prototype.countInfected = function() {
@@ -202,13 +233,16 @@ engine.prototype.step = function() {
 	numMoves = Math.min(numMoves, candidates.length);
 	numMoves = Math.max(numMoves, 1);
 
+	this.lastInfection = [];
 	for (; numMoves != 0; numMoves--) {
 		var ipick = Math.floor((Math.random() - 1e-9) * candidates.length);
 		var pick = candidates[ipick];
 		this.set(pick.x, pick.y, engine_ws_infected);
+		this.lastInfection.push(pick);
 		candidates.splice(ipick, 1);
 	}
 
+	this.lastBarrier = null;
 	var xy = this.algo(this.world);
 	if (xy == null) {
 		// This is a 'pass'
@@ -222,6 +256,7 @@ engine.prototype.step = function() {
 		return null;
 	}
 
+	this.lastBarrier = {"x": xy[0], "y": xy[1]};
 	this.set(xy[0], xy[1], engine_ws_barrier);
 
 	return null;
@@ -245,18 +280,19 @@ engine.prototype.loadNewCode = function(code) {
 	}
 	this.algo = barrier;
 	if (res != "")
-		$('#' + this.statusid).text(res);
+		$('#' + this.status1id).text(res);
 	return barrier != null;
 }
 
 engine.prototype.runSimulation = function() {
 	var total = 0;
 	for (var i = 0; i < engine_simulate_count; i++) {
-		this.seed(0);
+		this.seed(i);
 		this.resetWorld();
 		var r = this.runToEnd();
-		if (r != engine_status_game_over)
-			return r;
+		if (r != engine_status_game_over) {
+			return {seed: i, reason: r};
+		}
 		total += this.countInfected();
 	}
 	return total / engine_simulate_count;
@@ -265,19 +301,13 @@ engine.prototype.runSimulation = function() {
 engine.prototype.runInteractive = function(pauseMS, step) {
 	var self = this;
 	var res = this.step();
-	if (res == null) {
-		if (pauseMS == 0) {
-			if (step % 5 == 0)
-				this.draw(this.mapid);
-		} else {
-			this.draw(this.mapid);
-		}
-	} else {
+	this.draw(this.mapid);
+	if (res != null) {
 		this.draw(this.mapid);
 		if (res == engine_status_game_over) {
 			res = "Days: " + this.countInfected();
 		}
-		$('#' + this.statusid).text(res);
+		$('#' + this.status1id).text(res);
 		return;
 	}
 
@@ -291,6 +321,14 @@ engine.prototype.stopInteractive = function() {
 		clearTimeout(this.runTimer);
 }
 
+engine.prototype.blockFillStyle = function(type) {
+	if (type == engine_ws_sea)           return "rgba( 51, 133, 255, 1.0)";
+	else if (type == engine_ws_land)     return "rgba(  0, 138,  46, 1.0)";
+	else if (type == engine_ws_infected) return "rgba(209,  62,  25, 1.0)";
+	else if (type == engine_ws_barrier)  return "rgba( 64,  64,  64, 1.0)";
+	return "";
+}
+
 engine.prototype.draw = function(canvasId) {
 	var c = document.getElementById(canvasId);
 	var ctx = c.getContext("2d");
@@ -299,20 +337,29 @@ engine.prototype.draw = function(canvasId) {
 		bgimg = new Image();
 		bgimg.src = 'bgmap.png';
 	}
-	c.width = c.width;
 	ctx.strokeStyle = '';
 	if (this.designMode)
 		ctx.drawImage(bgimg, 0, 0, c.width, c.height);
 	var scalex = c.width / this.world.width;
 	var scaley = c.height / this.world.height;
-	for (var y = 0; y < this.world.height; y++) {
-		for (var x = 0; x < this.world.width; x++) {
-			var s = this.get(x,y);
-			if (s == engine_ws_sea)           ctx.fillStyle = "rgba( 51, 133, 255, 1.0)";
-			else if (s == engine_ws_land)     ctx.fillStyle = "rgba(  0, 138,  46, 1.0)";
-			else if (s == engine_ws_infected) ctx.fillStyle = "rgba(209,  62,  25, 1.0)";
-			else if (s == engine_ws_barrier)  ctx.fillStyle = "rgba( 64,  64,  64, 1.0)";
-			ctx.fillRect(x * scalex, y * scaley, scalex, scaley);
+	if (this.canvasDirty) {
+		c.width = c.width;
+		this.canvasDirty = false;
+		for (var y = 0; y < this.world.height; y++) {
+			for (var x = 0; x < this.world.width; x++) {
+				var s = this.get(x,y);
+				ctx.fillStyle = this.blockFillStyle(this.get(x,y));
+				ctx.fillRect(x * scalex, y * scaley, scalex, scaley);
+			}
+		}
+	} else {
+		ctx.fillStyle = this.blockFillStyle(engine_ws_infected);
+		for (var i = 0; i < this.lastInfection.length; i++) {
+			ctx.fillRect(this.lastInfection[i].x * scalex, this.lastInfection[i].y * scaley, scalex, scaley);
+		}
+		if (this.lastBarrier != null) {
+			ctx.fillStyle = this.blockFillStyle(engine_ws_barrier);
+			ctx.fillRect(this.lastBarrier.x * scalex, this.lastBarrier.y * scaley, scalex, scaley);
 		}
 	}
 }

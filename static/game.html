@@ -27,14 +27,20 @@
 	<table style='height: 100%;'>
 		<tr>
 			<td class='codePane'>
+				<div class='instructions'>
+					Modify this function so that it places barriers at better locations.<br/>
+					Click <code>Try</code> to test your code.
+					Click <code>Submit</code> to send your code to the leaderboard.<br/>
+					You can Submit as many attempts as you like.
+				</div>
 				<textarea rows='200' id='codeArea'></textarea>
 				<div class='btnDiv'><button id='run' class='btn'>Run</button></div>
-				<div class='btnDiv'><button id='submit' class='btn'>Submit</button></div>
+				<div class='btnDiv'><div id='status2' class='status2'>&nbsp;</div><button id='submit' class='btn'>Submit</button></div>
 			</td>
 			<td style='text-align: center'>
 				<canvas id='map' class='map' width='512' height='512'></canvas>
 				<div><label>Simulation delay <input id='pause' size='5' value='0'></input>ms</label></div>
-				<div id='status' class='status'>&nbsp;</div>
+				<div id='status1' class='status1'>&nbsp;</div>
 			</td>
 		</tr>
 	</table>
