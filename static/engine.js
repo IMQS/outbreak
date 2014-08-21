@@ -370,6 +370,7 @@ engine.prototype.blockFillStyle = function(type) {
 }
 
 engine.prototype.draw = function(canvasId) {
+	this.mapid = canvasId;
 	var c = document.getElementById(canvasId);
 	var ctx = c.getContext("2d");
 	var bgimg = null;
