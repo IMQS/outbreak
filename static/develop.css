@@ -9,6 +9,34 @@ body {
 	padding: 0;
 }
 
+.modal {
+	z-index: 100;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(255,255,255, 0.65);
+}
+
+.modal-inner {
+	text-align: center;
+	width: 600px;
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+	top: 350px;
+}
+
+.game-over {
+	font-size: 5em;
+}
+
+.try-again {
+	font-size: 3em;
+	text-decoration: none;
+}
+
 .instructions {
 	background: #fff;
 	padding: 1em;

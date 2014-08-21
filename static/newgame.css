@@ -1,0 +1,41 @@
+html {
+	height: 100%;
+	font-family: Verdana;
+}
+
+body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	font-size: 1.8em;
+}
+
+.absolute-center {
+	margin: auto;
+	position: absolute;
+	top: 0; left: 0; bottom: 0; right: 0;
+
+	width: 15em;
+	height: 13em;
+}
+
+.instructions {
+	font-size: 0.5em;
+}
+
+.label-row {
+	height: 2.2em;
+}
+
+.label {
+	margin-right: 1em;
+}
+
+input {
+	font-size: 1em;
+}
+
+button {
+	font-size: 1em;
+	padding: 0.3em 0.7em;
+}
