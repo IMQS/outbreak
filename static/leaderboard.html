@@ -1,16 +1,31 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE HTML>
+
 <head>
-<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>IMQS</title>
+    <script src='/static/jquery-2.0.3.min.js'></script>
+    <script src='/static/seedrandom.js'></script>
+    <script src='/static/engine.js'></script>
+    <script src='/static/leaderboard.js'></script>
+    <script src='/static/codemirror/lib/codemirror.js'></script>
+    <script src='/static/codemirror/mode/javascript/javascript.js'></script>
+
+    <link rel="stylesheet" href="/static/develop.css"/>
+    <link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
+
+    <link rel="stylesheet" href="/static/codemirror/theme/ambiance.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/eclipse.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/elegant.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/mdn-like.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/monokai.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/mbo.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/neat.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/neo.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/paraiso-light.css">
+    <link rel="stylesheet" href="/static/codemirror/theme/xq-light.css">
 
 </head>
 
-<body>
-	<div>Leaderboard</div>
+<body style="font-family:'verdana'" onload="leader_onload()">
+<table cellspacing="0" cellpadding="0" class='leaderboard-table'><tbody id='leaderboard' class='leaderboard-tbody'></tbody></table>
 </body>
-
-</html>
 
 

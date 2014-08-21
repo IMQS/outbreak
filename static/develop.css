@@ -86,3 +86,47 @@ body {
 	margin: 0em 1em;
 	font-size: 15pt;
 }
+
+.leaderboard-table {
+	width:100%;
+	height:100%;
+	margin: 0 auto;
+	max-width: 700px;
+	border: none;
+}
+
+.leaderboard-tbody {
+	width:100%;
+	height:100%;
+}
+
+.leaderboard-row {
+	width:100%;
+	height: 10%;
+	vertical-align: top;
+}
+
+.leaderboard-map {
+	vertical-align: middle;
+	border-bottom: 1px solid darkgray;
+}
+
+.leaderboard-map-canvas {
+	width: 120px;
+	height: 120px;
+}
+
+.leaderboard-name {
+	font-size: 50px;
+	vertical-align: middle;
+	color:gray;
+	border-bottom: 1px solid darkgray;
+}
+
+.leaderboard-score {
+	font-size: 50px;
+	vertical-align: middle;
+	color:gray;
+	border-bottom: 1px solid darkgray;
+	text-align: center;
+}
