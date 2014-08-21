@@ -49,6 +49,9 @@ function engine_onload() {
 			mode: "javascript"
 		});
 		editor.setSize("100%", "50em");
+		editor.on("change", function() {
+			$('#' + eng.submitid).attr("disabled", "disabled");
+		});
 		loadLocalStorage();
 		var run = function() {
 			var pause = $('#pause').val();
@@ -146,6 +149,7 @@ var engine_algo_line_txt =
 "	var INFECTED = 3;\n" +
 "	var BARRIER = 4;\n" +
 "	\n" +
+"	// this is a very simple function that draws a horizontal line across africa\n" +
 "	var y = 29;\n" +
 "	\n" +
 "	for (var x = 0; x < world.width; x++) {\n" +
