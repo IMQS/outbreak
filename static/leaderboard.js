@@ -15,8 +15,14 @@ Player.prototype.render = function(divId) {
 		this.score +
 		"</td>";
 	$("#"+divId).append(html);
-	this.engine.draw(mapId);
-	this.engine.runInteractive(10, 0);
+	try {
+		this.engine.draw(mapId);
+		var seed = Math.floor(Math.random() * 50) + 0;
+		this.engine.seed(seed);
+		this.engine.runInteractive(10, 0);
+	} catch(e) {
+		console.log("Failed to render bad code");
+	}
 };
 
 function LeaderBoard() {
@@ -30,7 +36,11 @@ LeaderBoard.prototype.loadFromServer = function() {
 			if (json.hasOwnProperty(p_key)) {
 				var player = new Player(json[p_key]);
 				player.engine = new engine();
-				player.engine.loadNewCode(player.code);
+				try {
+					player.engine.loadNewCode(player.code);
+				} catch(e) {
+					console.log("Failed to load bad code");
+				}
 				this.players.push(player);
 			}
 		}
