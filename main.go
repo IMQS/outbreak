@@ -19,25 +19,37 @@ var players map[string]*Player
 
 var m sync.Mutex
 
-func upsertPlayer(key string, new_p Player) {
+type errorString struct {
+	s string
+}
+
+func (e *errorString) Error() string {
+	return e.s
+}
+
+func upsertPlayer(key string, new_p Player) error {
 	if p, ok := players[key]; ok {
 		log.Println("Updating player : " + key)
 		if new_p.Name != "" {
 			//log.Println("Updating name for " + key + " to " + new_p.Name)
 			p.Name = new_p.Name
 		}
+		if new_p.Score != 0 {
+			if (p.Score != 0) && (new_p.Score >= p.Score) {
+				return &errorString{"This score is not better than your previous score"}
+			}
+			//log.Println("Updating score for " + key + " to " + strconv.Itoa(new_p.Score))
+			p.Score = new_p.Score
+		}
 		if new_p.Code != "" {
 			//log.Println("Updating code for " + key + " to " + new_p.Code)
 			p.Code = new_p.Code
-		}
-		if new_p.Score != 0 {
-			//log.Println("Updating score for " + key + " to " + strconv.Itoa(new_p.Score))
-			p.Score = new_p.Score
 		}
 	} else {
 		log.Printf("Inserting new player : %v\n", key)
 		players[key] = &new_p
 	}
+	return nil
 }
 
 func gameHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +75,12 @@ func upsertHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	m.Lock()
-	upsertPlayer(key, p)
+	if err = upsertPlayer(key, p); err != nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(err.Error()))
+		m.Unlock()
+		return
+	}
 	savePlayersToFile()
 	m.Unlock()
 
