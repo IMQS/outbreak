@@ -1,11 +1,28 @@
 html {
 	height: 100%;
+	font-family: Verdana;
 }
 
 body {
 	height: 100%;
 	margin: 0;
 	padding: 0;
+}
+
+.instructions {
+	background: #fff;
+	padding: 1em;
+	margin-bottom: 1em;
+	border: 1px solid #ccc;
+	border-radius: 1px;
+}
+
+.instructions code {
+	font-family: Verdana;
+	background: #f3f3f3;
+	padding: 0px 4px 0px 4px;
+	border-radius: 2px;
+	border: 1px solid #ececec;
 }
 
 .codePane {
@@ -26,12 +43,19 @@ body {
 }
 
 .btn {
-	height: 2.0em;
+	height: 2.5em;
 	width: 10em;
 }
 
-.status {
+.status1 {
 	margin: 1em;
+	font-size: 15pt;
+}
+
+.status2 {
+	display: inline-block;
+	width: 25em;
+	margin: 0em 1em;
 	font-size: 15pt;
 }
 
