@@ -27,11 +27,13 @@ function engine_onload() {
 	var last_score = 100000;
 	var best_score = 100000;
 
+	var default_email = "anonymous@example.com";
+
 	var time_limit_s = 10 * 60;
 
 	var loadLocalStorage = function() {
 		editor.doc.setValue(localStorage.getItem("code") || engine_algo_line_txt);
-		user_email = localStorage.getItem("user_email") || "anonymous@example.com";
+		user_email = localStorage.getItem("user_email") || default_email;
 		user_name = localStorage.getItem("user_name") || "anonymous";
 		user_start = localStorage.getItem("user_start") ? new Date(parseFloat(localStorage.getItem("user_start"))) : new Date();
 		best_score = parseFloat(localStorage.getItem("best_score") || "100000");
@@ -104,6 +106,8 @@ function engine_onload() {
 		};
 		resizePanels();
 		loadLocalStorage();
+		if (user_email == default_email)
+			window.location = "newgame.html";
 		showGameOver();
 		var run = function() {
 			var pause = $('#pause').val();
