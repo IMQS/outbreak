@@ -139,7 +139,7 @@ func serveProtected() {
 			log.Printf("Panic: %v\n", err)
 		}
 	}()
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Printf("ListenAndServe error: %v\n", err)
 	}
