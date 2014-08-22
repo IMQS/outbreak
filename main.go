@@ -133,6 +133,18 @@ func readFromFile() {
 	}
 }
 
+func serveProtected() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("Panic: %v\n", err)
+		}
+	}()
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Printf("ListenAndServe error: %v\n", err)
+	}
+}
+
 func main() {
 	readFromFile()
 	http.Handle("/static/", http.FileServer(http.Dir("./")))
@@ -140,8 +152,7 @@ func main() {
 	http.HandleFunc("/getall", getAllHandler)
 	http.HandleFunc("/getCode/", getCodeHandler)
 
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+	for {
+		serveProtected()
 	}
 }
