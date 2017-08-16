@@ -2,3 +2,5 @@ outbreak-server
 players.json
 .idea/
 static/static.iml
+*.exe
+*.zip
