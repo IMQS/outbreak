@@ -84,9 +84,10 @@ body {
 
 .logo {
 	width: 300px;
-	height: 104px;
-	background-image: url("/static/logo-small.png");
-	margin-bottom: 30px;
+	height: 113px;
+	background-image: url("/static/LogoRGB_IMQS Logo Gray-small.png");
+	margin-bottom: 12px;
+	margin-right: 19px;
 	display: inline-block;
 }
 
