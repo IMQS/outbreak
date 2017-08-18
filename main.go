@@ -28,6 +28,10 @@ func (e *errorString) Error() string {
 }
 
 func upsertPlayer(key string, new_p Player) error {
+	if new_p.Score < 10 || len(new_p.Code) <= 32 {
+		return &errorString{"This submission is invalid."}
+	}
+
 	if p, ok := players[key]; ok {
 		log.Println("Updating player : " + key)
 		if new_p.Name != "" {
